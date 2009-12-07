@@ -1,0 +1,12 @@
+#!/bin/sh
+declare -a cydia
+cydia=($CYDIA)
+
+if [[ $1 == remove ]]; then
+    if [[ ${CYDIA+@} ]]; then
+        eval "echo 'finish:restart' >&${cydia[0]}"
+    fi
+
+fi
+
+exit 0
