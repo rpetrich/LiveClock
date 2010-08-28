@@ -14,9 +14,9 @@ CHDeclareClass(SBApplication)
 #define SpringBoardBundle [NSBundle mainBundle]
 #define SettingsDictionary [NSDictionary dictionaryWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"plist"]]
 
-CHMethod1(id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
+CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
 {
-	if ((self = CHSuper1(LiveClockApplicationIcon, initWithApplication, application))) {
+	if ((self = CHSuper(1, LiveClockApplicationIcon, initWithApplication, application))) {
 		if (activeTimeView)
 			[activeTimeView removeFromSuperlayer];
 		else
@@ -26,46 +26,59 @@ CHMethod1(id, LiveClockApplicationIcon, initWithApplication, SBApplication *, ap
 	return self;
 }
 
-CHMethod0(void, LiveClockApplicationIcon, dealloc)
+CHOptimizedMethod(0, super, void, LiveClockApplicationIcon, dealloc)
 {
-	CHSuper0(LiveClockApplicationIcon, dealloc);
+	CHSuper(0, LiveClockApplicationIcon, dealloc);
 }
 
-CHMethod1(void, LiveClockApplicationIcon, setShowsImages, BOOL, showsImages)
+CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setShowsImages, BOOL, showsImages)
 {
 	[activeTimeView setUpdatesEnabled:showsImages];
-	CHSuper1(LiveClockApplicationIcon, setShowsImages, showsImages);
+	CHSuper(1, LiveClockApplicationIcon, setShowsImages, showsImages);
 }
 
-CHMethod0(UIImage *, LiveClockApplicationIcon, icon)
+CHOptimizedMethod(0, super, UIImage *, LiveClockApplicationIcon, icon)
 {
 	UIImage *result = [UIImage imageWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
 	if (result) {
-		CHSuper0(LiveClockApplicationIcon, icon);
+		CHSuper(0, LiveClockApplicationIcon, icon);
 		return result;
 	}
-	return CHSuper0(LiveClockApplicationIcon, icon);
+	return CHSuper(0, LiveClockApplicationIcon, icon);
 }
 
-CHMethod0(Class, SBApplication, iconClass)
+CHOptimizedMethod(1, super, UIImage *, LiveClockApplicationIcon, generateIconImage, int, format)
+{
+	UIImage *result = [UIImage imageWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
+	if (result) {
+		CHSuper(1, LiveClockApplicationIcon, generateIconImage, format);
+		return result;
+	}
+	return CHSuper(1, LiveClockApplicationIcon, generateIconImage, format);
+}
+
+CHOptimizedMethod(0, self, Class, SBApplication, iconClass)
 {
 	if ([[self bundleIdentifier] isEqualToString:targetBundleId]) {
-		if ([[SettingsDictionary objectForKey:@"enabled"] boolValue])
+		if ([[SettingsDictionary objectForKey:@"enabled"] boolValue]) {
+			CHSuper(0, SBApplication, iconClass);
 			return CHClass(LiveClockApplicationIcon);
+		}
 	}
-	return CHSuper0(SBApplication, iconClass);
+	return CHSuper(0, SBApplication, iconClass);
 }
 
 CHConstructor {
+	CHAutoreleasePoolForScope();
 	CHLoadLateClass(SBApplicationIcon);
 	CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
 	}
-	CHHook1(LiveClockApplicationIcon, initWithApplication);
-	CHHook0(LiveClockApplicationIcon, dealloc);
-	CHHook0(LiveClockApplicationIcon, icon);
-	CHHook1(LiveClockApplicationIcon, setShowsImages);
+	CHHook(1, LiveClockApplicationIcon, initWithApplication);
+	CHHook(0, LiveClockApplicationIcon, dealloc);
+	CHHook(0, LiveClockApplicationIcon, icon);
+	CHHook(1, LiveClockApplicationIcon, generateIconImage);
+	CHHook(1, LiveClockApplicationIcon, setShowsImages);
 	CHLoadLateClass(SBApplication);
-	CHHook0(SBApplication, iconClass);
-	CHAutoreleasePoolForScope();
+	CHHook(0, SBApplication, iconClass);
 	targetBundleId = [[SettingsDictionary objectForKey:@"target-application"]?:@"com.apple.mobiletimer" retain];
 }
