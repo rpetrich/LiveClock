@@ -8,8 +8,10 @@ Architecture: iphoneos-arm
 Version: 0.5
 Description: Animated Clock icon on the SpringBoard
 	Adds customizable animation to the SpringBoard Clock icon.
+	Themeable with WinterBoard
 Name: LiveClock
-Depends: mobilesubstrate (>= 0.9.2660-1)
-Author: Ryan Petrich (rated-r) <rpetrich@gmail.com>
-Depiction: http://booleanmagic.com/cydia/liveclock/
-Website: http://booleanmagic.com/cydia/liveclock/
+Depends: mobilesubstrate (>= 0.9.2660-1), firmware (>= 3.0)
+Author: Ryan Petrich <rpetrich@gmail.com>
+Depiction: http://rpetri.ch/cydia/liveclock/
+Website: http://rpetri.ch/cydia/liveclock/
+dev: rpetrich
