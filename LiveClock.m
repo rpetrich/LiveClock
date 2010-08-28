@@ -6,6 +6,7 @@
 
 static NSString *targetBundleId;
 static TimeView *activeTimeView;
+static UIImage *cachedImage;
 
 CHDeclareClass(SBApplicationIcon)
 CHDeclareClass(LiveClockApplicationIcon)
@@ -13,6 +14,10 @@ CHDeclareClass(SBApplication)
 
 #define SpringBoardBundle [NSBundle mainBundle]
 #define SettingsDictionary [NSDictionary dictionaryWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"plist"]]
+
+@interface UIDevice (OS40)
+- (BOOL)isWildcat;
+@end
 
 @interface UIScreen (OS40)
 @property (nonatomic, readonly) CGFloat scale;
@@ -48,24 +53,64 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setShowsImages, BOOL
 	CHSuper(1, LiveClockApplicationIcon, setShowsImages, showsImages);
 }
 
-CHOptimizedMethod(0, super, UIImage *, LiveClockApplicationIcon, icon)
+CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIcon, UIImage *, image)
 {
-	UIImage *result = [UIImage imageWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
-	if (result) {
-		CHSuper(0, LiveClockApplicationIcon, icon);
-		return result;
+	// 3.x
+	if (cachedImage) {
+		CHSuper(1, LiveClockApplicationIcon, setDisplayedIcon, cachedImage);
+		return;
 	}
-	return CHSuper(0, LiveClockApplicationIcon, icon);
+	if ([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) {
+		cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClockIcon-72" ofType:@"png"]];
+		if (cachedImage) {
+			CHSuper(1, LiveClockApplicationIcon, setDisplayedIcon, cachedImage);
+			return;
+		}
+	}
+	cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
+	if (cachedImage) {
+		CHSuper(1, LiveClockApplicationIcon, setDisplayedIcon, cachedImage);
+		return;
+	}
+	CHSuper(1, LiveClockApplicationIcon, setDisplayedIcon, image);
 }
 
-CHOptimizedMethod(1, super, UIImage *, LiveClockApplicationIcon, generateIconImage, int, format)
+CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIconImage, UIImage *, image)
 {
-	UIImage *result = [UIImage imageWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
-	if (result) {
-		CHSuper(1, LiveClockApplicationIcon, generateIconImage, format);
-		return result;
+	// 4.0
+	if (cachedImage) {
+		CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);
+		return;
 	}
-	return CHSuper(1, LiveClockApplicationIcon, generateIconImage, format);
+	if ([UIDevice instancesRespondToSelector:@selector(isWildcat)] && [[UIDevice currentDevice] isWildcat]) {
+		cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClockIcon-72" ofType:@"png"]];
+		if (cachedImage) {
+			CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);
+			return;
+		}
+	}
+	if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
+		CGFloat scale = [[UIScreen mainScreen] scale];
+		if (scale != 1.0f) {
+			NSString *scaledName = [NSString stringWithFormat:@"LiveClockIcon@%.0fx", scale];
+			cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:scaledName ofType:@"png"]];
+			if (cachedImage) {
+				CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);
+				return;
+			}
+		}
+	}
+	cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClockIcon" ofType:@"png"]];
+	if (cachedImage) {
+		CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);
+		return;
+	}
+	cachedImage = [[UIImage alloc] initWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"png"]];
+	if (cachedImage) {
+		CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);
+		return;
+	}
+	CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, image);
 }
 
 CHOptimizedMethod(0, self, Class, SBApplication, iconClass)
@@ -86,8 +131,8 @@ CHConstructor {
 	}
 	CHHook(1, LiveClockApplicationIcon, initWithApplication);
 	CHHook(0, LiveClockApplicationIcon, dealloc);
-	CHHook(0, LiveClockApplicationIcon, icon);
-	CHHook(1, LiveClockApplicationIcon, generateIconImage);
+	CHHook(1, LiveClockApplicationIcon, setDisplayedIcon);
+	CHHook(1, LiveClockApplicationIcon, setDisplayedIconImage);
 	CHHook(1, LiveClockApplicationIcon, setShowsImages);
 	CHLoadLateClass(SBApplication);
 	CHHook(0, SBApplication, iconClass);
