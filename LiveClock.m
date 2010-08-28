@@ -14,6 +14,14 @@ CHDeclareClass(SBApplication)
 #define SpringBoardBundle [NSBundle mainBundle]
 #define SettingsDictionary [NSDictionary dictionaryWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"plist"]]
 
+@interface UIScreen (OS40)
+@property (nonatomic, readonly) CGFloat scale;
+@end
+
+@interface CALayer (OS40)
+@property (nonatomic, assign) CGFloat contentsScale;
+@end
+
 CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
 {
 	if ((self = CHSuper(1, LiveClockApplicationIcon, initWithApplication, application))) {
@@ -21,6 +29,9 @@ CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, S
 			[activeTimeView removeFromSuperlayer];
 		else
 			activeTimeView = [[TimeView alloc] initWithSettings:SettingsDictionary];
+		if ([activeTimeView respondsToSelector:@selector(setContentsScale:)])
+			if ([UIScreen instancesRespondToSelector:@selector(scale)])
+				activeTimeView.contentsScale = [UIScreen mainScreen].scale;
 		[[self layer] addSublayer:activeTimeView];
 	}
 	return self;
