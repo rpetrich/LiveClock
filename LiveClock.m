@@ -113,6 +113,11 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIconImag
 	CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, image);
 }
 
+CHOptimizedMethod(0, super, UIImage *, LiveClockApplicationIcon, imageForReflection)
+{
+	return cachedImage ?: CHSuper(0, LiveClockApplicationIcon, imageForReflection);
+}
+
 CHOptimizedMethod(0, self, Class, SBApplication, iconClass)
 {
 	if ([[self bundleIdentifier] isEqualToString:targetBundleId]) {
@@ -134,6 +139,7 @@ CHConstructor {
 	CHHook(1, LiveClockApplicationIcon, setDisplayedIcon);
 	CHHook(1, LiveClockApplicationIcon, setDisplayedIconImage);
 	CHHook(1, LiveClockApplicationIcon, setShowsImages);
+	CHHook(0, LiveClockApplicationIcon, imageForReflection);
 	CHLoadLateClass(SBApplication);
 	CHHook(0, SBApplication, iconClass);
 	targetBundleId = [[SettingsDictionary objectForKey:@"target-application"]?:@"com.apple.mobiletimer" retain];
