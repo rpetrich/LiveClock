@@ -308,7 +308,12 @@ typedef enum {
 - (id)initWithSettings:(NSDictionary *)settings;
 {
 	if ((self = [super init])) {
-		[self setFrame:CGRectMake(1.0f, -1.0f, 57.0f, 57.0f)];
+		CGRect frame;
+		frame.size.width = [Lookup(settings, @"width", [NSNumber numberWithFloat:57.0f]) floatValue];
+		frame.size.height = [Lookup(settings, @"height", [NSNumber numberWithFloat:57.0f]) floatValue];
+		frame.origin.x = 30 - (NSInteger)frame.size.width / 2;
+		frame.origin.y = 28 - (NSInteger)frame.size.height / 2;
+		self.frame = frame;
 		_updateInterval = [Lookup(settings, @"update-interval", [NSNumber numberWithFloat:3.0f]) floatValue];
 		NSArray *layoutArray = Lookup(settings, @"layout", [NSArray array]);
 		_layers = [[NSMutableArray alloc] init];
