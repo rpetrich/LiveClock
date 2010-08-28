@@ -6,6 +6,10 @@
 
 #define PI 3.14159265f
 
+@interface UIScreen (OS40)
+@property (nonatomic, readonly) CGFloat scale;
+@end
+
 #define Lookup(dictionary, key, defaultValue) \
 	([dictionary objectForKey:key]?:defaultValue)
 	
@@ -246,8 +250,18 @@ typedef enum {
 		NSString *imagePath = Lookup(dictionary, @"path", nil);
 		if ([imagePath length]) {
 			NSBundle *springBundle = [NSBundle bundleWithIdentifier:@"com.apple.springboard"];
+			if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
+				CGFloat scale = [[UIScreen mainScreen] scale];
+				if (scale != 1.0f) {
+					NSString *basePath = [imagePath stringByDeletingPathExtension];
+					NSString *scaledName = [NSString stringWithFormat:@"%@@%.0fx", basePath, scale];
+					image = [[UIImage alloc] initWithContentsOfFile:[springBundle pathForResource:scaledName ofType:[imagePath pathExtension]]];
+					if (image)
+						return self;
+				}
+			}
 			NSString *settingsPath = [springBundle pathForResource:imagePath ofType:nil];
-			image = [[UIImage imageWithContentsOfFile:settingsPath] retain];
+			image = [[UIImage alloc] initWithContentsOfFile:settingsPath];
 			if (!image)
 				CancelInit(@"LiveClock: Unable to load image at path: %@", imagePath);
 		} else {
