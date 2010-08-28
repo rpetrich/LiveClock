@@ -59,11 +59,11 @@ CHMethod0(Class, SBApplication, iconClass)
 CHConstructor {
 	CHLoadLateClass(SBApplicationIcon);
 	CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
-		CHHook1(LiveClockApplicationIcon, initWithApplication);
-		CHHook0(LiveClockApplicationIcon, dealloc);
-		CHHook0(LiveClockApplicationIcon, icon);
-		CHHook1(LiveClockApplicationIcon, setShowsImages);
 	}
+	CHHook1(LiveClockApplicationIcon, initWithApplication);
+	CHHook0(LiveClockApplicationIcon, dealloc);
+	CHHook0(LiveClockApplicationIcon, icon);
+	CHHook1(LiveClockApplicationIcon, setShowsImages);
 	CHLoadLateClass(SBApplication);
 	CHHook0(SBApplication, iconClass);
 	CHAutoreleasePoolForScope();

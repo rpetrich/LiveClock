@@ -280,6 +280,8 @@ typedef enum {
 			divisions = 60;
 			index = [components second];
 			break;
+		default:
+			return;
 	}
 	if (index < 0)
 		index += divisions;
