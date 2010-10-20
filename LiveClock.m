@@ -2,7 +2,7 @@
 #import <SpringBoard/SpringBoard.h>
 #import <CaptainHook/CaptainHook.h>
 
-#import "TimeView.h"
+#import "LiveClockLayer.h"
 
 static NSString *targetBundleId;
 static UIImage *cachedImage;
@@ -29,14 +29,14 @@ CHDeclareClass(SBApplication)
 CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
 {
 	if ((self = CHSuper(1, LiveClockApplicationIcon, initWithApplication, application))) {
-		TimeView **timeViewVar = CHIvarRef(self, _timeView, TimeView *);
-		if (timeViewVar) {
-			TimeView *activeTimeView = [[TimeView alloc] initWithSettings:SettingsDictionary];
-			*timeViewVar = activeTimeView;
-			if ([activeTimeView respondsToSelector:@selector(setContentsScale:)])
+		LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+		if (clockLayerRef) {
+			LiveClockLayer *clockLayer = [[LiveClockLayer alloc] initWithSettings:SettingsDictionary];
+			*clockLayerRef = clockLayer;
+			if ([clockLayer respondsToSelector:@selector(setContentsScale:)])
 				if ([UIScreen instancesRespondToSelector:@selector(scale)])
-					activeTimeView.contentsScale = [UIScreen mainScreen].scale;
-			[[self layer] addSublayer:activeTimeView];
+					clockLayer.contentsScale = [UIScreen mainScreen].scale;
+			[[self layer] addSublayer:clockLayer];
 		}
 	}
 	return self;
@@ -44,17 +44,17 @@ CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, S
 
 CHOptimizedMethod(0, super, void, LiveClockApplicationIcon, dealloc)
 {
-	TimeView **timeViewVar = CHIvarRef(self, _timeView, TimeView *);
-	if (timeViewVar)
-		[*timeViewVar release];
+	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+	if (clockLayerRef)
+		[*clockLayerRef release];
 	CHSuper(0, LiveClockApplicationIcon, dealloc);
 }
 
 CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setShowsImages, BOOL, showsImages)
 {
-	TimeView **timeViewVar = CHIvarRef(self, _timeView, TimeView *);
-	if (timeViewVar)
-		[*timeViewVar setUpdatesEnabled:showsImages];
+	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+	if (clockLayerRef)
+		[*clockLayerRef setUpdatesEnabled:showsImages];
 	CHSuper(1, LiveClockApplicationIcon, setShowsImages, showsImages);
 }
 
@@ -120,9 +120,9 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIconImag
 
 CHOptimizedMethod(2, super, void, LiveClockApplicationIcon, setGhostly, BOOL, ghostly, requester, int, requester)
 {
-	TimeView **timeViewVar = CHIvarRef(self, _timeView, TimeView *);
-	if (timeViewVar)
-		[*timeViewVar setOpacity:ghostly ? 0.33f : 1.0f];
+	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+	if (clockLayerRef)
+		[*clockLayerRef setOpacity:ghostly ? 0.33f : 1.0f];
 	CHSuper(2, LiveClockApplicationIcon, setGhostly, ghostly, requester, requester);
 }
 
@@ -154,7 +154,7 @@ CHConstructor {
 	CHAutoreleasePoolForScope();
 	CHLoadLateClass(SBApplicationIcon);
 	CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
-		CHAddIvar(CHClass(LiveClockApplicationIcon), _timeView, TimeView *);
+		CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
 	}
 	CHHook(1, LiveClockApplicationIcon, initWithApplication);
 	CHHook(0, LiveClockApplicationIcon, dealloc);

@@ -1,7 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface TimeView : CALayer {
+__attribute__((visibility("hidden")))
+@interface LiveClockLayer : CALayer {
 @private
 	NSTimer *_timer;
 	NSMutableArray *_layers;

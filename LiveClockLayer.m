@@ -1,4 +1,4 @@
-#import "TimeView.h"
+#import "LiveClockLayer.h"
 #import <QuartzCore/QuartzCore.h>
 
 #define RGBA(r, g, b, a) \
@@ -20,14 +20,14 @@
 		return nil; \
 	} while(0)
 
-@interface LiveClockLayer : NSObject
-{
+__attribute__((visibility("hidden")))
+@interface LiveClockLayerItem : NSObject {
 }
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (void)drawInContext:(CGContextRef)context withComponents:(NSDateComponents *)components;
 @end
 
-@implementation LiveClockLayer
+@implementation LiveClockLayerItem
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
 	self = [super init];
@@ -44,8 +44,10 @@ typedef enum {
 	HandLayerSourceMinute,
 	HandLayerSourceSecond,
 } HandLayerSource;
-@interface LiveClockHandLayer : LiveClockLayer
-{
+
+__attribute__((visibility("hidden")))
+@interface LiveClockHandLayerItem : LiveClockLayerItem {
+@private
 	HandLayerSource source;
 	CGFloat redColor;
 	CGFloat greenColor;
@@ -57,7 +59,7 @@ typedef enum {
 }
 @end
 
-@implementation LiveClockHandLayer
+@implementation LiveClockHandLayerItem
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
@@ -150,8 +152,9 @@ typedef enum {
 
 @end
 
-@interface LiveClockEllipseLayer : LiveClockLayer
-{
+__attribute__((visibility("hidden")))
+@interface LiveClockEllipseLayerItem : LiveClockLayerItem {
+@private
 	CGFloat redColor;
 	CGFloat greenColor;
 	CGFloat blueColor;
@@ -160,7 +163,7 @@ typedef enum {
 }
 @end
 
-@implementation LiveClockEllipseLayer
+@implementation LiveClockEllipseLayerItem
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
@@ -211,15 +214,16 @@ typedef enum {
 
 @end
 
-@interface LiveClockImageLayer : LiveClockLayer
-{
+__attribute__((visibility("hidden")))
+@interface LiveClockImageLayerItem : LiveClockLayerItem {
+@private
 	CGPoint origin;
 	UIImage *image;
 	HandLayerSource source;
 }
 @end
 
-@implementation LiveClockImageLayer
+@implementation LiveClockImageLayerItem
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
@@ -317,9 +321,9 @@ typedef enum {
 
 @end
 
-@implementation TimeView
+@implementation LiveClockLayer
 
-- (id)initWithSettings:(NSDictionary *)settings;
+- (id)initWithSettings:(NSDictionary *)settings
 {
 	if ((self = [super init])) {
 		CGRect frame;
@@ -333,13 +337,13 @@ typedef enum {
 		_layers = [[NSMutableArray alloc] init];
 		for (NSDictionary *layerDict in layoutArray) {
 			NSString *layerType = Lookup(layerDict, @"type", nil);
-			LiveClockLayer *layer;
+			LiveClockLayerItem *layer;
 			if ([layerType isEqualToString:@"hand"])
-				layer = [LiveClockHandLayer alloc];
+				layer = [LiveClockHandLayerItem alloc];
 			else if ([layerType isEqualToString:@"ellipse"])
-				layer = [LiveClockEllipseLayer alloc];
+				layer = [LiveClockEllipseLayerItem alloc];
 			else if ([layerType isEqualToString:@"image"])
-				layer = [LiveClockImageLayer alloc];
+				layer = [LiveClockImageLayerItem alloc];
 			else {
 				NSLog(@"LiveClock: Unknown layer type: %@", layerType);
 				continue;
@@ -387,7 +391,7 @@ typedef enum {
 	NSCalendar *calendar = [NSCalendar currentCalendar];
 	NSDateComponents *timeComponents = [calendar components:NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit fromDate:[NSDate date]];
 	// Draw each layer
-	for (LiveClockLayer *layer in _layers)
+	for (LiveClockLayerItem *layer in _layers)
 		[layer drawInContext:context withComponents:timeComponents];
 }
 
