@@ -28,6 +28,7 @@ CHDeclareClass(SBApplication)
 
 CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
 {
+	
 	if ((self = CHSuper(1, LiveClockApplicationIcon, initWithApplication, application))) {
 		TimeView **timeViewVar = CHIvarRef(self, _timeView, TimeView *);
 		if (timeViewVar) {
@@ -82,6 +83,7 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIcon, UI
 
 CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIconImage, UIImage *, image)
 {
+	
 	// 4.0
 	if (cachedImage) {
 		CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, cachedImage);

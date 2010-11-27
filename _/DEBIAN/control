@@ -1,0 +1,18 @@
+Package: LiveClock
+Provides: livetime
+Conflicts: livetime
+Replaces: livetime
+Priority: optional
+Section: System
+Architecture: iphoneos-arm
+Version: 0.5-14
+Description: Animated Clock icon on the SpringBoard
+	Adds customizable animation to the SpringBoard Clock icon.
+	Themeable with WinterBoard
+Name: LiveClock
+Depends: mobilesubstrate (>= 0.9.2660-1), firmware (>= 3.0)
+Author: Joshua Lee Tucker <darkmalloc@gmail.com>
+Depiction: http://joshualeetucker.com/cydia/liveclock/
+Website: http://joshualeetucker.com/cydia/liveclock/
+dev: DarkMalloc
+Installed-Size: 136
