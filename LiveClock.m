@@ -8,6 +8,8 @@ static NSString *targetBundleId;
 static UIImage *cachedImage;
 
 CHDeclareClass(SBApplicationIcon)
+CHDeclareClass(SBIconView)
+CHDeclareClass(SBIconViewMap)
 CHDeclareClass(LiveClockApplicationIcon)
 CHDeclareClass(SBApplication)
 
@@ -26,12 +28,33 @@ CHDeclareClass(SBApplication)
 @property (nonatomic, assign) CGFloat contentsScale;
 @end
 
+@interface SBIcon (SBApplicationIcon)
+- (SBApplication *)application;
+@end
+
 CHOptimizedMethod(1, super, id, LiveClockApplicationIcon, initWithApplication, SBApplication *, application)
 {
 	if ((self = CHSuper(1, LiveClockApplicationIcon, initWithApplication, application))) {
 		LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
 		if (clockLayerRef) {
 			LiveClockLayer *clockLayer = [[LiveClockLayer alloc] initWithSettings:SettingsDictionary];
+			*clockLayerRef = clockLayer;
+			if ([clockLayer respondsToSelector:@selector(setContentsScale:)])
+				if ([UIScreen instancesRespondToSelector:@selector(scale)])
+					clockLayer.contentsScale = [UIScreen mainScreen].scale;
+			[[self layer] addSublayer:clockLayer];
+		}
+	}
+	return self;
+}
+
+CHOptimizedMethod(0, super, id, LiveClockApplicationIcon, initWithDefaultSize)
+{
+	if ((self = CHSuper(0, LiveClockApplicationIcon, initWithDefaultSize))) {
+		LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+		if (clockLayerRef) {
+			LiveClockLayer *clockLayer = [[LiveClockLayer alloc] initWithSettings:SettingsDictionary];
+			[clockLayer setUpdatesEnabled:YES];
 			*clockLayerRef = clockLayer;
 			if ([clockLayer respondsToSelector:@selector(setContentsScale:)])
 				if ([UIScreen instancesRespondToSelector:@selector(scale)])
@@ -150,21 +173,42 @@ CHOptimizedMethod(0, self, Class, SBApplication, iconClass)
 	return CHSuper(0, SBApplication, iconClass);
 }
 
+CHOptimizedClassMethod(2, self, Class, SBIconViewMap, iconViewClassForIcon, SBIcon *, icon, location, int, location)
+{
+	if (CHIsClass(icon, SBApplicationIcon)) {
+		if ([[[icon application] displayIdentifier] isEqualToString:targetBundleId]) {
+			if ([[SettingsDictionary objectForKey:@"enabled"] boolValue]) {
+				return CHClass(LiveClockApplicationIcon);
+			}
+		}
+	}
+	return CHSuper(2, SBIconViewMap, iconViewClassForIcon, icon, location, location);
+}
+
 CHConstructor {
 	CHAutoreleasePoolForScope();
-	CHLoadLateClass(SBApplicationIcon);
-	CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
-		CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
-	}
-	CHHook(1, LiveClockApplicationIcon, initWithApplication);
-	CHHook(0, LiveClockApplicationIcon, dealloc);
-	CHHook(1, LiveClockApplicationIcon, setDisplayedIcon);
-	CHHook(1, LiveClockApplicationIcon, setDisplayedIconImage);
-	CHHook(1, LiveClockApplicationIcon, setShowsImages);
-	CHHook(2, LiveClockApplicationIcon, setGhostly, requester);
-	CHHook(1, LiveClockApplicationIcon, createComposedIconImageUsingContext);
-	CHHook(0, LiveClockApplicationIcon, imageForReflection);
 	CHLoadLateClass(SBApplication);
-	CHHook(0, SBApplication, iconClass);
+	CHLoadLateClass(SBApplicationIcon);
+	if (CHLoadLateClass(SBIconView)) {
+		CHRegisterClass(LiveClockApplicationIcon, SBIconView) {
+			CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
+		}
+		CHHook(0, LiveClockApplicationIcon, initWithDefaultSize);
+		CHLoadLateClass(SBIconViewMap);
+		CHHook(2, SBIconViewMap, iconViewClassForIcon, location);
+	} else {
+		CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
+			CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
+		}
+		CHHook(1, LiveClockApplicationIcon, initWithApplication);
+		CHHook(1, LiveClockApplicationIcon, setDisplayedIcon);
+		CHHook(1, LiveClockApplicationIcon, setShowsImages);
+		CHHook(1, LiveClockApplicationIcon, createComposedIconImageUsingContext);
+		CHHook(0, LiveClockApplicationIcon, imageForReflection);
+		CHHook(0, SBApplication, iconClass);
+	}
+	CHHook(2, LiveClockApplicationIcon, setGhostly, requester);
+	CHHook(1, LiveClockApplicationIcon, setDisplayedIconImage);
+	CHHook(0, LiveClockApplicationIcon, dealloc);
 	targetBundleId = [[SettingsDictionary objectForKey:@"target-application"]?:@"com.apple.mobiletimer" retain];
 }
