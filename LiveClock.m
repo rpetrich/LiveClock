@@ -141,6 +141,16 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIconImag
 	CHSuper(1, LiveClockApplicationIcon, setDisplayedIconImage, image);
 }
 
+CHOptimizedMethod(0, super, void, LiveClockApplicationIcon, prepareGhostlyImage)
+{
+	UIImage **_ghostlyImage = CHIvarRef(self, _ghostlyImage, UIImage *);
+	if (cachedImage && _ghostlyImage && !*_ghostlyImage) {
+		*_ghostlyImage = [cachedImage retain];
+	} else {
+		CHSuper(0, LiveClockApplicationIcon, prepareGhostlyImage);
+	}
+}
+
 CHOptimizedMethod(2, super, void, LiveClockApplicationIcon, setGhostly, BOOL, ghostly, requester, int, requester)
 {
 	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
@@ -194,6 +204,7 @@ CHConstructor {
 			CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
 		}
 		CHHook(0, LiveClockApplicationIcon, initWithDefaultSize);
+		CHHook(0, LiveClockApplicationIcon, prepareGhostlyImage);
 		CHLoadLateClass(SBIconViewMap);
 		CHHook(2, SBIconViewMap, iconViewClassForIcon, location);
 	} else {
