@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore2.h>
 #import <SpringBoard/SpringBoard.h>
 #import <CaptainHook/CaptainHook.h>
 
@@ -156,6 +157,11 @@ CHOptimizedMethod(2, super, void, LiveClockApplicationIcon, setGhostly, BOOL, gh
 	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
 	if (clockLayerRef)
 		[*clockLayerRef setOpacity:ghostly ? 0.33f : 1.0f];
+	// Way slower than generating a cached "ghostly" image, but I can't be bothered...
+	if ([CALayer instancesRespondToSelector:@selector(setFilters:)]) {
+		NSArray *filters = ghostly ? [NSArray arrayWithObject:[CAFilter filterWithName:@"colorMonochrome"]] : nil;
+		[[self layer] setFilters:filters];
+	}
 	CHSuper(2, LiveClockApplicationIcon, setGhostly, ghostly, requester, requester);
 }
 
