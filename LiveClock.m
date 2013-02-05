@@ -82,6 +82,14 @@ CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setShowsImages, BOOL
 	CHSuper(1, LiveClockApplicationIcon, setShowsImages, showsImages);
 }
 
+CHOptimizedMethod(2, super, void, LiveClockApplicationIcon, setIsHidden, BOOL, hidden, animate, BOOL, animate)
+{
+	LiveClockLayer **clockLayerRef = CHIvarRef(self, _clockLayer, LiveClockLayer *);
+	if (clockLayerRef)
+		[*clockLayerRef setUpdatesEnabled:!hidden];
+	CHSuper(2, LiveClockApplicationIcon, setIsHidden, hidden, animate, animate);
+}
+
 CHOptimizedMethod(1, super, void, LiveClockApplicationIcon, setDisplayedIcon, UIImage *, image)
 {
 	// 3.x
@@ -211,6 +219,7 @@ CHConstructor {
 		}
 		CHHook(0, LiveClockApplicationIcon, initWithDefaultSize);
 		CHHook(0, LiveClockApplicationIcon, prepareGhostlyImage);
+		CHHook(2, LiveClockApplicationIcon, setIsHidden, animate);
 		CHLoadLateClass(SBIconViewMap);
 		CHHook(2, SBIconViewMap, iconViewClassForIcon, location);
 	} else {
