@@ -13,6 +13,8 @@ CHDeclareClass(SBIconView)
 CHDeclareClass(SBIconViewMap)
 CHDeclareClass(LiveClockApplicationIcon)
 CHDeclareClass(SBApplication)
+CHDeclareClass(SBIconController)
+CHDeclareClass(SBAppSwitcherController)
 
 #define SpringBoardBundle [NSBundle mainBundle]
 #define SettingsDictionary [NSDictionary dictionaryWithContentsOfFile:[SpringBoardBundle pathForResource:@"LiveClock" ofType:@"plist"]]
@@ -209,10 +211,36 @@ CHOptimizedClassMethod(2, self, Class, SBIconViewMap, iconViewClassForIcon, SBIc
 	return CHSuper(2, SBIconViewMap, iconViewClassForIcon, icon, location, location);
 }
 
+CHOptimizedMethod(2, self, Class, SBIconController, viewMap, id, viewMap, iconViewClassForIcon, SBIcon *, icon)
+{
+	if (CHIsClass(icon, SBApplicationIcon)) {
+		if ([[[icon application] displayIdentifier] isEqualToString:targetBundleId]) {
+			if ([[SettingsDictionary objectForKey:@"enabled"] boolValue]) {
+				return CHClass(LiveClockApplicationIcon);
+			}
+		}
+	}
+	return CHSuper(2, SBIconController, viewMap, viewMap, iconViewClassForIcon, icon);
+}
+
+CHOptimizedMethod(2, self, Class, SBAppSwitcherController, viewMap, id, viewMap, iconViewClassForIcon, SBIcon *, icon)
+{
+	if (CHIsClass(icon, SBApplicationIcon)) {
+		if ([[[icon application] displayIdentifier] isEqualToString:targetBundleId]) {
+			if ([[SettingsDictionary objectForKey:@"enabled"] boolValue]) {
+				return CHClass(LiveClockApplicationIcon);
+			}
+		}
+	}
+	return CHSuper(2, SBAppSwitcherController, viewMap, viewMap, iconViewClassForIcon, icon);
+}
+
 CHConstructor {
 	CHAutoreleasePoolForScope();
 	CHLoadLateClass(SBApplication);
 	CHLoadLateClass(SBApplicationIcon);
+	CHLoadLateClass(SBIconController);
+	CHLoadLateClass(SBAppSwitcherController);
 	if (CHLoadLateClass(SBIconView)) {
 		CHRegisterClass(LiveClockApplicationIcon, SBIconView) {
 			CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
@@ -222,6 +250,8 @@ CHConstructor {
 		CHHook(2, LiveClockApplicationIcon, setIsHidden, animate);
 		CHLoadLateClass(SBIconViewMap);
 		CHHook(2, SBIconViewMap, iconViewClassForIcon, location);
+		CHHook(2, SBIconController, viewMap, iconViewClassForIcon);
+		CHHook(2, SBAppSwitcherController, viewMap, iconViewClassForIcon);
 	} else {
 		CHRegisterClass(LiveClockApplicationIcon, SBApplicationIcon) {
 			CHAddIvar(CHClass(LiveClockApplicationIcon), _clockLayer, LiveClockLayer *);
